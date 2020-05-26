@@ -1,0 +1,1 @@
+pipenv run coverage run cacc/manage.py test cacc
