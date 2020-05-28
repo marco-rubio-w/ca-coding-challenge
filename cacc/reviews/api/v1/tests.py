@@ -1,3 +1,5 @@
+import random
+
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
@@ -23,6 +25,95 @@ class TestCompanyReviewListingEndpoint(APITestCase):
 
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_user_access_is_allowed(self):
+        """Tests that authenticated user access is allowed"""
+
+        url = V1_REVIEW_LIST_URL
+        usernames = [REGULAR_USER_USERNAME, ADMIN_USER_USERNAME]
+
+        for username in usernames:
+            reviewer = models.Reviewer.objects.filter(
+                username=username
+            ).first()
+
+            self.client.force_authenticate(user=reviewer)
+
+            response = self.client.get(url, format="json")
+            self.assertEqual(response.status_code, 200)
+
+    def test_regular_users_can_retrieve_only_own_reviews(self):
+        """Tests that regular users can retrieve only own reviews"""
+
+        url = V1_REVIEW_LIST_URL
+        users = models.Reviewer.objects.filter(is_staff=False)
+        expected_records = {}
+
+        models.CompanyReview.objects.all().delete()
+
+        for user in users:
+            # Create between 4 and 20 reviews per user
+            expected_records[user] = random.randint(4, 20)
+            for index in range(0, expected_records[user]):
+                models.CompanyReview.objects.create(
+                    title=f"Title {index}",
+                    summary=f"Summary {index}",
+                    company=models.Company.objects.first(),
+                    rating=1,
+                    reviewer=user,
+                    ip_address="12:34:56:78",
+                )
+
+        for user in users:
+            record_count = models.CompanyReview.objects.filter(
+                reviewer=user
+            ).count()
+            self.assertEqual(record_count, expected_records[user])
+
+            self.client.force_authenticate(user=user)
+            response = self.client.get(url, format="json")
+            self.assertEqual(response.status_code, 200)
+            content = response.json()
+            self.assertIsInstance(content, list)
+            self.assertEqual(record_count, len(content))
+
+            for record in content:
+                self.assertEqual(record["reviewer"], user.id)
+
+    def test_admin_users_can_retrieve_all_reviews(self):
+        """Tests that admin users can retrieve all reviews"""
+
+        url = V1_REVIEW_LIST_URL
+        users = models.Reviewer.objects.filter(is_staff=False)
+        expected_records = 0
+
+        models.CompanyReview.objects.all().delete()
+
+        for user in users:
+            # Create between 4 and 20 reviews per user
+            for index in range(0, random.randint(4, 20)):
+                models.CompanyReview.objects.create(
+                    title=f"Title {index}",
+                    summary=f"Summary {index}",
+                    company=models.Company.objects.first(),
+                    rating=1,
+                    reviewer=user,
+                    ip_address="12:34:56:78",
+                )
+                expected_records += 1
+
+        user = models.Reviewer.objects.filter(is_staff=True).first()
+
+        record_count = models.CompanyReview.objects.count()
+        self.assertEqual(record_count, expected_records)
+
+        self.client.force_authenticate(user=user)
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        content = response.json()
+        self.assertIsInstance(content, list)
+        self.assertEqual(record_count, len(content))
 
 
 class TestCompanyReviewCreationEndpoint(APITestCase):

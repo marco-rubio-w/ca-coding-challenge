@@ -23,3 +23,27 @@ class CompanyReviewViewSet(viewsets.ModelViewSet):
 
     queryset = models.CompanyReview.objects.all()
     serializer_class = serializers.CompanyReviewSerializer
+
+    def get_permissions(self):
+        """Gets the permissions for this class"""
+        permission_classes = []
+
+        if self.action in ["list", "create", "retrieve"]:
+            permission_classes = [permissions.IsAuthenticated]
+
+        else:
+            permission_classes = [permissions.IsAdminUser]
+
+        return [permission_class() for permission_class in permission_classes]
+
+    def get_queryset(self):
+        """Filters the query based on the current user"""
+
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        # Make sure regular users can access their own reviews only
+        if not user.is_staff:
+            queryset = queryset.filter(reviewer=user)
+
+        return queryset
