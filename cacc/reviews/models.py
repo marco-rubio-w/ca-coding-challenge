@@ -18,6 +18,8 @@ class Company(models.Model):
 class CompanyReview(models.Model):
     """Stores a company review posted by a user"""
 
+    MIN_RATING_VALUE = 1
+    MAX_RATING_VALUE = 5
     MAX_TITLE_LENGTH: int = 64
     MAX_SUMMARY_LENGTH: int = 10 ** 4
 
