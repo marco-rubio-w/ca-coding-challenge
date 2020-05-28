@@ -136,6 +136,96 @@ class TestCompanyReviewCreationEndpoint(APITestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, 401)
 
+    def test_authenticated_user_object_creation(self):
+        """Tests that authenticated user object creation"""
+
+        url = V1_REVIEW_LIST_URL
+        reviewers = models.Reviewer.objects.all()
+
+        for reviewer in reviewers:
+            data = {
+                "title": "Title",
+                "summary": "Summary",
+                "company": models.Company.objects.first().id,
+                "rating": 1,
+            }
+
+            self.client.force_authenticate(user=reviewer)
+
+            response = self.client.post(url, data, format="json")
+            self.assertEqual(response.status_code, 201)
+
+            created_object = response.json()
+            self.assertEqual(created_object["reviewer"], reviewer.id)
+
+    def test_rating_field_only_accepts_integers_within_range(self):
+        """Tests that the rating field only accepts integers within range"""
+
+        url = V1_REVIEW_LIST_URL
+        min_value = models.CompanyReview.MIN_RATING_VALUE
+        max_value = models.CompanyReview.MIN_RATING_VALUE
+        range_start = min_value - 5
+        range_end = min_value + 5
+
+        base_data = {
+            "title": "Title",
+            "summary": "Summary",
+            "company": models.Company.objects.first().id,
+        }
+
+        reviewer = models.Reviewer.objects.filter(is_staff=False).first()
+
+        self.client.force_authenticate(user=reviewer)
+
+        for value in range(range_start, range_end):
+            data = {"rating": value, **base_data}
+            response = self.client.post(url, data, format="json")
+            content = response.json()
+
+            if min_value <= value <= max_value:
+                self.assertEqual(response.status_code, 201)
+                self.assertEqual(content["rating"], value)
+
+            else:
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("rating", content)
+
+    def test_ip_client_address_is_added_to_created_object(self):
+        """Tests that client ip address is added to created object"""
+
+        url = V1_REVIEW_LIST_URL
+        remote_address = "82.73.64.55"
+        data = {
+            "title": "Title",
+            "summary": "Summary",
+            "company": models.Company.objects.first().id,
+            "rating": 1,
+        }
+
+        self.client.force_authenticate(
+            user=models.Reviewer.objects.filter(is_staff=False).first()
+        )
+
+        # Test regular address
+        response = self.client.post(
+            url, data, format="json", REMOTE_ADDR=remote_address
+        )
+        content = response.json()
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("ip_address", content)
+        self.assertEqual(content["ip_address"], remote_address)
+
+        # Test forwarded address
+        forwarded_header = f"{remote_address}, 103.0.123.105, 40.42.3.28"
+        response = self.client.post(
+            url, data, format="json", HTTP_X_FORWARDED_FOR=forwarded_header
+        )
+        content = response.json()
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("ip_address", content)
+        self.assertEqual(content["ip_address"], remote_address)
 
 
 class TestCompanyReviewRetrievalEndpoint(APITestCase):
