@@ -1,4 +1,5 @@
 import random
+from unittest.mock import patch
 
 from django.urls import reverse
 from rest_framework.test import APITestCase
@@ -376,3 +377,33 @@ class TestCompanyReviewDeletionEndpoint(APITestCase):
 
         response = self.client.delete(url, format="json")
         self.assertEqual(response.status_code, 401)
+
+    def test_admin_user_only_access(self):
+        """Tests admin user only access"""
+
+        url = V1_REVIEW_LIST_URL
+        data = {"title": "New title"}
+
+        reviewers = models.Reviewer.objects.filter(is_staff=False)
+
+        create_random_reviews(random.randint(4, 20), reviewers)
+
+        all_reviews = models.CompanyReview.objects.all()
+        all_users = models.Reviewer.objects.all()
+
+        # Patch to avoid actual instance deletion
+        with patch.object(models.CompanyReview, "delete") as delete:
+            delete.side_effect = lambda: (1, {"reviews.CompanyReview": 1})
+
+            for user in all_users:
+                for review in all_reviews:
+                    self.client.force_authenticate(user=user)
+                    url = reverse(V1_REVIEW_DETAIL, kwargs={"pk": review.id})
+
+                    response = self.client.delete(url, data, format="json")
+
+                    if user.is_staff:
+                        self.assertEqual(response.status_code, 204)
+
+                    else:
+                        self.assertEqual(response.status_code, 403)
