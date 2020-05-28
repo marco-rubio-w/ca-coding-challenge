@@ -31,6 +31,7 @@ class CompanyReviewSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     ip_address = serializers.ReadOnlyField()
+
     class Meta:
         """Configuration for this serializer"""
 

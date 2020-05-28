@@ -1,0 +1,15 @@
+[
+  {
+    "model": "reviews.companyreview",
+    "pk": 1,
+    "fields": {
+      "company": 1,
+      "reviewer": 1,
+      "rating": 4,
+      "title": "One sample rating",
+      "summary": "This shoud be a summary that doesn't exceed the 10k character limit",
+      "ip_address": "12.34.56.78",
+      "date": "2020-01-01T00:00:00Z"
+    }
+  }
+]
