@@ -242,6 +242,74 @@ class TestCompanyReviewRetrievalEndpoint(APITestCase):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 401)
 
+    def test_regular_users_can_retrieve_only_own_reviews(self):
+        """Tests that regular users can retrieve only own reviews"""
+
+        url = V1_REVIEW_LIST_URL
+        reviewers = models.Reviewer.objects.filter(is_staff=False)
+
+        models.CompanyReview.objects.all().delete()
+
+        # Create between 4 and 20 reviews
+        for index in range(0, random.randint(4, 20)):
+            reviewer = random.choice(reviewers)
+
+            models.CompanyReview.objects.create(
+                title=f"Title {index}",
+                summary=f"Summary {index}",
+                company=models.Company.objects.first(),
+                rating=1,
+                reviewer=reviewer,
+                ip_address="12:34:56:78",
+            )
+
+        all_reviews = models.CompanyReview.objects.all()
+
+        for review in all_reviews:
+            for reviewer in reviewers:
+                if reviewer != review.reviewer:
+                    self.client.force_authenticate(user=reviewer)
+                    url = reverse(V1_REVIEW_DETAIL, kwargs={"pk": review.id})
+
+                    response = self.client.get(url, format="json")
+                    self.assertEqual(response.status_code, 404)
+
+    def test_admin_users_can_retrieve_all_reviews(self):
+        """Tests that admin users can retrieve all reviews"""
+
+        url = V1_REVIEW_LIST_URL
+        reviewers = models.Reviewer.objects.filter(is_staff=False)
+
+        models.CompanyReview.objects.all().delete()
+
+        # Create between 4 and 20 reviews
+        for index in range(0, random.randint(4, 20)):
+            reviewer = random.choice(reviewers)
+
+            models.CompanyReview.objects.create(
+                title=f"Title {index}",
+                summary=f"Summary {index}",
+                company=models.Company.objects.first(),
+                rating=1,
+                reviewer=reviewer,
+                ip_address="12:34:56:78",
+            )
+
+        all_reviews = models.CompanyReview.objects.all()
+        user = models.Reviewer.objects.filter(is_staff=True).first()
+
+        for review in all_reviews:
+            self.assertNotEqual(user, review.reviewer)
+
+            self.client.force_authenticate(user=user)
+            url = reverse(V1_REVIEW_DETAIL, kwargs={"pk": review.id})
+
+            response = self.client.get(url, format="json")
+            self.assertEqual(response.status_code, 200)
+
+            content = response.json()
+            self.assertEqual(review.id, content["id"])
+
 
 class TestCompanyReviewUpdateEndpoint(APITestCase):
     """Tests for the company review update endpoint"""

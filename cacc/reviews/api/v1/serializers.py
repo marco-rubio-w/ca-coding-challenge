@@ -67,6 +67,7 @@ class CompanyReviewSerializer(serializers.ModelSerializer):
 
         model = models.CompanyReview
         fields = (
+            "id",
             "company",
             "rating",
             "title",
