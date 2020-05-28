@@ -13,6 +13,26 @@ ADMIN_USER_USERNAME = "admin"
 REGULAR_USER_USERNAME = "regular"
 
 
+def create_random_reviews(review_count, users, companies=None):
+    """Creates random reviews"""
+
+    if companies is None:
+        companies = models.Company.objects.all()
+
+    for index in range(0, review_count):
+        reviewer = random.choice(users)
+        company = random.choice(companies)
+
+        models.CompanyReview.objects.create(
+            title=f"Title {index}",
+            summary=f"Summary {index}",
+            company=company,
+            rating=1,
+            reviewer=reviewer,
+            ip_address="12:34:56:78",
+        )
+
+
 class TestCompanyReviewListingEndpoint(APITestCase):
     """Tests for the company review listing endpoint"""
 
@@ -251,17 +271,7 @@ class TestCompanyReviewRetrievalEndpoint(APITestCase):
         models.CompanyReview.objects.all().delete()
 
         # Create between 4 and 20 reviews
-        for index in range(0, random.randint(4, 20)):
-            reviewer = random.choice(reviewers)
-
-            models.CompanyReview.objects.create(
-                title=f"Title {index}",
-                summary=f"Summary {index}",
-                company=models.Company.objects.first(),
-                rating=1,
-                reviewer=reviewer,
-                ip_address="12:34:56:78",
-            )
+        create_random_reviews(random.randint(4, 20), reviewers)
 
         all_reviews = models.CompanyReview.objects.all()
 
@@ -325,6 +335,32 @@ class TestCompanyReviewUpdateEndpoint(APITestCase):
 
         response = self.client.patch(url, data, format="json")
         self.assertEqual(response.status_code, 401)
+
+    def test_admin_user_only_access(self):
+        """Tests admin user only access"""
+
+        url = V1_REVIEW_LIST_URL
+        data = {"title": "New title"}
+
+        reviewers = models.Reviewer.objects.filter(is_staff=False)
+
+        create_random_reviews(random.randint(4, 20), reviewers)
+
+        all_reviews = models.CompanyReview.objects.all()
+        all_users = models.Reviewer.objects.all()
+
+        for user in all_users:
+            for review in all_reviews:
+                self.client.force_authenticate(user=user)
+                url = reverse(V1_REVIEW_DETAIL, kwargs={"pk": review.id})
+
+                response = self.client.patch(url, data, format="json")
+
+                if user.is_staff:
+                    self.assertEqual(response.status_code, 200)
+
+                else:
+                    self.assertEqual(response.status_code, 403)
 
 
 class TestCompanyReviewDeletionEndpoint(APITestCase):
