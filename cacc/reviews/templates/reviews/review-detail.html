@@ -1,0 +1,22 @@
+{% extends "reviews/base.html" %}
+
+{% block main_content %}
+<section class="section">
+  <div class="container">
+    <h1 class="is-size-3">Review from {{ review.reviewer.get_full_name }} for {{ review.company.name }}</h1>
+
+    <div>
+      <a href="{% url 'review-list' %}" class="button is-link">All reviews</a>
+      <a href="{% url 'review-list-by-user' reviewer=review.reviewer.id %}" class="button is-link">All reviews from this reviewer</a>
+      <a href="{% url 'logout' %}" class="button is-link">Logout</a>
+    </div>
+
+    <p class="is-size-4">
+      <em>"{{ review.title }}"</em>
+      <strong>{{ review.rating }} / {{ max_rating }}</strong>
+    </p>
+    <p>{{ review.summary }}</p>
+  </div>
+
+</section>
+{% endblock main_content %}
