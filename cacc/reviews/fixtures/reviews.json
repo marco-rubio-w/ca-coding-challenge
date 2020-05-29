@@ -1,0 +1,28 @@
+[
+  {
+    "model": "reviews.companyreview",
+    "pk": 1,
+    "fields": {
+      "company": 2,
+      "reviewer": 2,
+      "rating": 4,
+      "title": "One sample rating",
+      "summary": "This shoud be a summary that doesn't exceed the 10k character limit",
+      "ip_address": "12.34.56.78",
+      "date": "2020-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "reviews.companyreview",
+    "pk": 2,
+    "fields": {
+      "company": 1,
+      "reviewer": 3,
+      "rating": 5,
+      "title": "I loved working for them",
+      "summary": "It was amazing!",
+      "ip_address": "23.45.67.89",
+      "date": "2020-01-01T00:00:00Z"
+    }
+  }
+]
