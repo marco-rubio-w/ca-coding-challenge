@@ -95,10 +95,11 @@ class TestCompanyReviewListingEndpoint(APITestCase):
             response = self.client.get(url, format="json")
             self.assertEqual(response.status_code, 200)
             content = response.json()
-            self.assertIsInstance(content, list)
-            self.assertEqual(record_count, len(content))
+            self.assertIsInstance(content, dict)
+            self.assertIn("results", content)
+            self.assertEqual(record_count, len(content["results"]))
 
-            for record in content:
+            for record in content["results"]:
                 self.assertEqual(record["reviewer"], user.id)
 
     def test_admin_users_can_retrieve_all_reviews(self):
@@ -133,8 +134,9 @@ class TestCompanyReviewListingEndpoint(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         content = response.json()
-        self.assertIsInstance(content, list)
-        self.assertEqual(record_count, len(content))
+        self.assertIsInstance(content, dict)
+        self.assertIn("results", content)
+        self.assertEqual(record_count, len(content["results"]))
 
 
 class TestCompanyReviewCreationEndpoint(APITestCase):
