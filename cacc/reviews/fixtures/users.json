@@ -1,0 +1,42 @@
+[
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$180000$uMbZvncTGAOC$QkQYJtd2mFGBUVW9GAq4ZH9baE14S8C7LjbF2Dhx9KM=",
+      "last_login": null,
+      "username": "admin",
+      "first_name": "Admin",
+      "last_name": "User",
+      "email": "admin_user@users.info",
+      "is_staff": 1,
+      "date_joined": "2020-05-27T11:26:24.726Z"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$180000$uMbZvncTGAOC$QkQYJtd2mFGBUVW9GAq4ZH9baE14S8C7LjbF2Dhx9KM=",
+      "last_login": null,
+      "username": "regular",
+      "first_name": "Jonh",
+      "last_name": "Smith",
+      "email": "john_smith@users.info",
+      "date_joined": "2020-05-27T11:26:24.726Z"
+    }
+  },
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+      "password": "pbkdf2_sha256$180000$uMbZvncTGAOC$QkQYJtd2mFGBUVW9GAq4ZH9baE14S8C7LjbF2Dhx9KM=",
+      "last_login": null,
+      "username": "jane_doe",
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "email": "jane_doe@users.info",
+      "date_joined": "2020-05-27T11:26:24.726Z"
+    }
+  }
+]
