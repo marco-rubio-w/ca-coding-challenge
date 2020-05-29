@@ -1,0 +1,15 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="stylesheet" href="{% static 'css/lib/bulma.min.css' %}"></script>
+  <title>Company Reviews</title>
+  {% block styles %}{% endblock styles %}
+</head>
+<body>
+  {% block main_content %}{% endblock main_content %}
+  {% block scripts %}{% endblock scripts %}
+</body>
+</html>

@@ -1,0 +1,30 @@
+[
+  {
+    "model": "reviews.company",
+    "pk": 1,
+    "fields": {
+      "name": "Google"
+    }
+  },
+  {
+    "model": "reviews.company",
+    "pk": 2,
+    "fields": {
+      "name": "Hewlett Packard"
+    }
+  },
+  {
+    "model": "reviews.company",
+    "pk": 3,
+    "fields": {
+      "name": "Instagram"
+    }
+  },
+  {
+    "model": "reviews.company",
+    "pk": 4,
+    "fields": {
+      "name": "Twitter"
+    }
+  }
+]

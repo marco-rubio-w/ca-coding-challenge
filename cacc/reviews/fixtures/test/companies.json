@@ -1,0 +1,9 @@
+[
+  {
+    "model": "reviews.company",
+    "pk": 1,
+    "fields": {
+      "name": "Test company 1"
+    }
+  }
+]
