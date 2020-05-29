@@ -1,0 +1,62 @@
+{% extends "reviews/base.html" %}
+
+{% block main_content %}
+<section class="section">
+  <div class="container">
+  {% if focused_reviewer %}
+    <h1 class="is-size-3">Reviews for {{ focused_reviewer.get_full_name }}</h1>
+  {% else %}
+    <h1 class="is-size-3">All reviews</h1>
+  {% endif %}
+
+  <div>
+    {% if focused_reviewer %}
+    <a href="{% url 'review-list' %}" class="button is-link">All reviews</a>
+    {% endif %}
+    <a href="{% url 'logout' %}" class="button is-link">Logout</a>
+  </div>
+
+  {% if reviews|length == 0 %}
+    <div class="notification is-warning is-light">
+      There are no reviews to show in this view
+    </div>
+  {% else %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>id</th>
+          {% if not focused_reviewer %}
+          <th>User</th>
+          {% endif %}
+          <th>Title</th>
+          <th>Company</th>
+          <th>Rating</th>
+          <th>Submitted</th>
+          <th>From</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for review in reviews %}
+        <tr>
+          <td>{{ review.id }}</td>
+          {% if not focused_reviewer %}
+          <td>
+            <a href="{% url 'review-list-by-user' reviewer=review.reviewer.id %}">{{ review.reviewer.get_full_name }}</a>
+          </td>
+          {% endif %}
+          <td>
+            <a href="{% url 'review-detail' review=review.id %}">{{ review.title }}</a>
+          </td>
+          <td>{{ review.company.name }}</td>
+          <td>{{ review.rating }}</td>
+          <td>{{ review.date }}</td>
+          <td>{{ review.ip_address }}</td>
+        <tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  </div>
+
+</section>
+{% endblock main_content %}

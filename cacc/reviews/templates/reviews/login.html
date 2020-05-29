@@ -1,0 +1,66 @@
+{% extends "reviews/base.html" %}
+
+{% block main_content %}
+<section class="section">
+  {% if form.errors %}
+    <div class="notification is-danger is-light">
+      <p>Your username and password didn't match. Please try again.</p>
+    </div>
+  {% endif %}
+
+  {% if next %}
+    <div class="notification is-danger is-light">
+    {% if user.is_authenticated %}
+      <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+      <p>Please login to see this page.</p>
+    {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="container">
+    <form method="post" class="box" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="field">
+        <label class="label" for="id_username">{{ form.username.label }}</label>
+        <div class="control">
+          <input type="text"
+            name="username"
+            autofocus
+            autocapitalize="none"
+            autocomplete="username"
+            maxlength="150"
+            required
+            id="id_username"
+            class="input"
+            placeholder="username"
+          />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="id_password">{{ form.password.label }}</label>
+        <div class="control">
+          <input type="password"
+            name="password"
+            autocomplete="current-password"
+            required
+            id="id_password"
+            class="input"
+            placeholder="password"
+          />
+        </div>
+      </div>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-link">Submit</button>
+        </div>
+      </div>
+
+      <input type="hidden" name="next" value="{{ next }}">
+    </form>
+  </div>
+</section>
+{% endblock main_content %}
